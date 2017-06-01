@@ -40,11 +40,11 @@
 		public function getJWT()
 		{
 			$data = [
-				'code' 		=> 200,
-				'status' 	=> 'success',
-				'message' 	=> 'The request has succeeded.',
-				'data' 		=> [
-					'user_id' 	=> $this->user_id,
+				'code' => 200,
+				'status' => 'success',
+				'message' => 'The request has succeeded.',
+				'data' => [
+					'user_id' => $this->user_id,
 					'user_type' => $this->user_type,
 				]
 			];
@@ -59,9 +59,9 @@
 		public function getJWTerror()
 		{
 			$data = [
-				'code' 		=> 401,
-				'status' 	=> 'fail',
-				'message' 	=> 'The request has not been applied because it lacks valid authentication credentials for the target resource.',
+				'code' => 401,
+				'status' => 'fail',
+				'message' => 'The request has not been applied because it lacks valid authentication credentials for the target resource.',
 			];
 
 			header('Content-Type: application/json');
