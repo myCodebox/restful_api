@@ -20,6 +20,8 @@ composer install
 
 ### Todo
 ```
-Folder: /api/v2/users
-htaccess: /?rex-api-call=restfull_api&func=users
+Folder:
+	root/api
+htaccess:
+	^/v2/users$ /?rex-api-call=restfull_api&func=users  [NC,L]
 ```
