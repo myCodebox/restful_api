@@ -7,10 +7,10 @@
 	class rex_api_restfull_api extends rex_api_function {
 
 
-		protected $published 	= true;
-		protected $user 		= null;
-		protected $user_id 		= null;
-		protected $user_type 	= null;
+		protected $published = true;
+
+		protected $user_id = null;
+		protected $user_type = null;
 
 
 		public function execute()
