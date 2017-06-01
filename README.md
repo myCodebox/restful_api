@@ -19,9 +19,10 @@ composer install
 
 
 ### Todo
+Create `api` folder and add a `.htaccess` file
 ```
 Folder:
 	root/api
 htaccess:
-	^/v2/users$ /?rex-api-call=restfull_api&func=users  [NC,L]
+	^/v2/users$ /?rex-api-call=restfull_api&func=users [NC,L]
 ```
