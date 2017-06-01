@@ -5,11 +5,10 @@
 	], false);
 
 echo <<<EOD
-	<div class="result"></div>
+	<pre class="result"></pre>
 	<script type="text/javascript">
 		$.post( '$url', function( data ) {
-			// $( ".result" ).html( JSON.stringify(data) );
-			$( ".result" ).html( data );
+			$( ".result" ).html( JSON.stringify(data) );
 		});
 	</script>
 EOD;

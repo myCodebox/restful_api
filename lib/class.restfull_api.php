@@ -6,57 +6,69 @@
 	// FRONTEND http://localhost/meine/Redaxo/01/?rex-api-call=restfull_api
 	class rex_api_restfull_api extends rex_api_function {
 
-		protected $published = true;
 
-		public function execute() {
+		protected $published 	= true;
+		protected $user 		= null;
+		protected $user_id 		= null;
+		protected $user_type 	= null;
 
-			$ycom_user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
-			// $ycom_user = rex_ycom_auth::getUser();
-			if ($ycom_user) {
-				$message = $this->getTest($ycom_user);
+
+		public function execute()
+		{
+			if( $this->setUser() && rex_request::requestMethod() == 'post' ) {
+				$message = $this->getJWT();
 			} else {
-				$message = $this->getError();
+				$message = $this->getJWTerror();
 			}
 
 			$result = new rex_api_result(true, $message);
 			return $result;
 		}
 
-		public function getTest($ycom_user) {
-			$key 		= "example_key";
-			$issuedAt   = date('U', time());
-		    $notBefore  = date('U', $issuedAt + 10);
-		    $expire  	= date('U', $issuedAt + 60);
 
-			$userId 	= $ycom_user->getValue('id');
-			$username 	= (rex::isBackend()) ? $ycom_user->getValue('login') : $ycom_user->getValue('name');
+		private function setUser()
+		{
+			$user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
+			if( $user ) {
+				$this->user_id = $user->getId();
+				$this->user_type = (rex::isBackend()) ? 'backend' : 'frontend';
+			}
+			return $user;
+		}
 
-			$token = array(
-			    "iss" => "http://example.org",
-			    "aud" => "http://example.com",
-			    "iat" => $issuedAt,
-			    "nbf" => $issuedAt,
-				'exp' => $expire,
-				'data' => [
-					'userId' 	=> $userId,
-					'userName' 	=> $username
+
+		public function getJWT()
+		{
+			$data = [
+				'code' 		=> 200,
+				'status' 	=> 'success',
+				'message' 	=> 'The request has succeeded.',
+				'data' 		=> [
+					'user_id' 	=> $this->user_id,
+					'user_type' => $this->user_type,
 				]
-			);
-
-			$jwt 		= JWT::encode($token, $key);
-			$decoded 	= JWT::decode($jwt, $key, array('HS256'));
+			];
 
 			header('Content-Type: application/json');
 			header('HTTP/1.1 200 OK');
-			echo json_encode($jwt);
-			// echo json_encode($decoded);
+			echo json_encode($data);
 			exit;
 		}
 
-		public function getError() {
+
+		public function getJWTerror()
+		{
+			$data = [
+				'code' 		=> 401,
+				'status' 	=> 'fail',
+				'message' 	=> 'The request has not been applied because it lacks valid authentication credentials for the target resource.',
+			];
+
 			header('Content-Type: application/json');
 			header('HTTP/1.1 401 Unauthorized');
+			echo json_encode($data);
 			exit;
 		}
+
 
 	}
