@@ -1,0 +1,17 @@
+package: restful_api
+version: dev
+author: Herbert Leier
+supportpage: https://www.codebox.at/
+
+page:
+    block:  codebox
+    title:  'Restful API'
+    perm:   restful_api[]
+    icon:   rex-icon fa-plug
+    subpages:
+        restful_api_overview:   { pjax: true, title: 'translate:restful_api_overview', perm: restful_api[] }
+        restful_api_settings:   { pjax: true, title: 'translate:restful_api_settings', perm: restful_api[] }
+        restful_api_info:       { pjax: true, title: 'translate:restful_api_info', perm: restful_api[] }
+
+requires:
+    redaxo: '>= 5.2.0'
