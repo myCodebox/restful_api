@@ -28,12 +28,33 @@
 			// exit;
 
 
-			$key = "example_key";
+			// $key = "example_key";
+			// $token = array(
+			//     "iss" => "http://example.org",
+			//     "aud" => "http://example.com",
+			//     "iat" => 1356999524,
+			//     "nbf" => 1357000000
+			// );
+			//
+
+			$key 		= "example_key";
+			$issuedAt   = date('U', time());
+		    $notBefore  = date('U', $issuedAt + 10);
+		    $expire  	= date('U', $issuedAt + 60);
+
+			$userId 	= rex_ycom_auth::getUser()->getValue('id');
+			$username 	= rex_ycom_auth::getUser()->getValue('name');
+
 			$token = array(
 			    "iss" => "http://example.org",
 			    "aud" => "http://example.com",
-			    "iat" => 1356999524,
-			    "nbf" => 1357000000
+			    "iat" => $issuedAt,
+			    "nbf" => $issuedAt,
+				'exp' => $expire,
+				'data' => [
+					'userId' => $userId,
+					'userName' => $username
+				]
 			);
 
 			$jwt = JWT::encode($token, $key);
@@ -41,6 +62,7 @@
 
 			header('Content-Type: application/json');
 			echo json_encode($jwt);
+			// echo json_encode($decoded);
 			exit;
 		}
 
