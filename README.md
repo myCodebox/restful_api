@@ -2,7 +2,10 @@
 Restful API for Redaxo 5
 
 
-## Install vendor
-´´´
+## Installation
+
+Use composer to manage your dependencies
+
+```
 composer install
-´´´
+```
