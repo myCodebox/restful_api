@@ -10,6 +10,35 @@ Use composer to manage your dependencies
 composer install
 ```
 
+### Use Frontend User
+```
+root/?rex-api-call=restfull_api&func=users
+```
+### Use Backend User
+```
+root/redaxo/index.php?page=restful_api/restful_api_overview&rex-api-call=restfull_api
+```
+JS Demo
+```php
+<?php
+
+	$url = rex_url::currentBackendPage([
+		'rex-api-call'=>'restfull_api'
+	], false);
+
+	echo <<<EOD
+		<pre class="result"></pre>
+		<script type="text/javascript">
+			$(document).on('ready pjax:success',function(){
+				$.post( '$url', function( data ) {
+					$( ".result" ).html( JSON.stringify(data) );
+				});
+			});
+		</script>
+EOD;
+?>
+```
+
 
 ### Links
 * https://www.sitepoint.com/php-authorization-jwt-json-web-tokens/
