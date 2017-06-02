@@ -31,7 +31,8 @@
 
 		private function setUser()
 		{
-			$user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
+			$ycom = (rex_addon::exist('ycom')) ? rex_ycom_auth::getUser() : null;
+			$user = (rex::isBackend()) ? rex::getUser() : $ycom;
 			if( $user ) {
 				$this->user_id = $user->getId();
 				$this->user_type = (rex::isBackend()) ? 'backend' : 'frontend';
