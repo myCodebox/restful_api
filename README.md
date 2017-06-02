@@ -34,6 +34,7 @@ echo <<<EOD
 	});
 </script>
 EOD;
+
 ?>
 ```
 
