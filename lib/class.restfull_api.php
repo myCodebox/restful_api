@@ -18,6 +18,7 @@
 
 		public function execute()
 		{
+			$message = '';
 			if( $this->setUser() && rex_request::requestMethod() == 'post' ) {
 				$message = $this->getJWT();
 			} else {
@@ -31,8 +32,8 @@
 
 		private function setUser()
 		{
-			$ycom = (rex_addon::exist('ycom')) ? rex_ycom_auth::getUser() : null;
-			$user = (rex::isBackend()) ? rex::getUser() : $ycom;
+			// $ycom = (rex_addon::exist('ycom')) ? rex_ycom_auth::getUser() : null;
+			$user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
 			if( $user ) {
 				$this->user_id = $user->getId();
 				$this->user_type = (rex::isBackend()) ? 'backend' : 'frontend';
