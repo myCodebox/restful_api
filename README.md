@@ -12,7 +12,7 @@ composer install
 
 ### Use Frontend User
 ```
-root/?rex-api-call=restfull_api&func=users
+root/?rex-api-call=restfull_api
 ```
 ### Use Backend User
 ```
