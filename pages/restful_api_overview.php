@@ -7,8 +7,10 @@
 echo <<<EOD
 	<pre class="result"></pre>
 	<script type="text/javascript">
-		$.post( '$url', function( data ) {
-			$( ".result" ).html( JSON.stringify(data) );
+		$(document).on('ready pjax:success',function(){
+			$.post( '$url', function( data ) {
+				$( ".result" ).html( JSON.stringify(data) );
+			});
 		});
 	</script>
 EOD;
