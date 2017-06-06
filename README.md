@@ -39,7 +39,7 @@ EOD;
 ```
 
 ### HTML Test page
-```
+```html
 <!DOCTYPE html>
 <html>
 	<head>
