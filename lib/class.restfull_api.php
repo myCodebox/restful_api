@@ -10,7 +10,7 @@
 		protected $published 		= true;
 
 		// CONFIG Data
-		protected $jwt_frontend 	= false;
+		protected $jwt_active 		= false;
 		protected $jwt_secretKey 	= null;
 		protected $jwt_algorithm 	= 'HS256';
 
@@ -23,25 +23,48 @@
 		{
 			$this->setConfig();
 
+			$func = rex_get('func', 'string');
+
 			$message = '';
-			if(
-				$this->setUser()
-				&& rex_request::requestMethod() == 'post'
-				&& $this->jwt_frontend
-			) {
-				$message = $this->getJWT();
+
+			if( $func == 'ext' ) {
+				$message = $this->isOK();
 			} else {
-				$message = $this->getJWTerror();
+				$message = $this->isNOK();
 			}
+
+			// if( $this->setUser() && rex_request::requestMethod() == 'post' && $this->jwt_active ) {
+			// 	$message = $this->getJWT();
+			// } else {
+			// 	$message = $this->getJWTerror();
+			// }
 
 			$result = new rex_api_result(true, $message);
 			return $result;
 		}
 
 
+		private function isOK()
+		{
+			$btoa = rex_request('hash', 'string');
+			$hash = base64_decode($btoa);
+			header('Content-Type: application/json');
+			header('HTTP/1.1 200 OK');
+			echo json_encode(['OK', $hash]);
+			exit;
+		}
+		private function isNOK()
+		{
+			header('Content-Type: application/json');
+			header('HTTP/1.1 401 Unauthorized');
+			echo json_encode(['NOK']);
+			exit;
+		}
+
+
 		private function setConfig() {
 			$addon = rex_addon::get('restful_api');
-			$this->jwt_frontend 	= $addon->getConfig('restful_api_frontend');
+			$this->jwt_active 		= $addon->getConfig('restful_api_active');
 			$this->jwt_secretKey 	= $addon->getConfig('restful_api_secretKey');
 			$this->jwt_algorithm 	= $addon->getConfig('restful_api_algorithm');
 		}
@@ -73,7 +96,7 @@
 				'nbf'  => $notBefore,        			// Not before
 				'exp'  => $expire,           			// Expire
 				'data' => [                  			// Data related to the signer user
-					'user_id' => $this->user_id, 		// userid from the users table
+					'user_id' 	=> $this->user_id, 		// userid from the users table
 					'user_type' => $this->user_type, 	// User name
 				]
 			];

@@ -12,4 +12,4 @@ restful_api_info 		= Info
 
 // EINSTELLUNGEN
 restful_api_save_btn 	= Save
-restful_api_frontend 	= Frontend request
+restful_api_active 		= Frontend request

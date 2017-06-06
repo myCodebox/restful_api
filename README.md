@@ -38,6 +38,62 @@ EOD;
 ?>
 ```
 
+### HTML Test page
+```
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>API Test</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/7.2.1/jsrsasign-all-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.min.js"></script>
+	</head>
+	<body>
+
+
+		<script type="text/javascript">
+			$(function(){
+				var App = App || {};
+				App.init = {
+					api_url: 		'ROOT\/?rex-api-call=restfull_api&func=ext',
+					api_hash: 		'aWQ9MSZrZXk9NzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTg=';
+					/*
+					 * -----------------------------------------------------------------------------
+					 * Set Data with 'btoa' or in PHP with 'base64_encode()'
+					 * Get Data with 'atob' or in PHP with 'base64_decode()'
+					 * api_user_id 	= 1;
+ 					 * api_user_key = '77a01054c185818606aa077cb7ac1b58';
+					 * api_hash 	= btoa('id='+api_user_id+'&key='+api_user_key);
+					 * -----------------------------------------------------------------------------
+					 * get this hash 'aWQ9MSZrZXk9NzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTg='
+					 * -----------------------------------------------------------------------------
+					 */
+
+					login: function () {
+						// alert(this.user_api);
+						let hash_btoa = btoa('id='+this.api_user_id+'&key='+this.api_user_key);
+						let hash_atob = atob(hash_btoa);
+
+						reqwest({
+							url: this.api_url,
+							method: 'post',
+							data: { hash: hash_btoa },
+							success: function (resp) {
+								// qwery('#content').html(resp)
+							}
+						})
+					},
+				}
+
+				App.init.login();
+			});
+
+		</script>
+	</body>
+</html>
+```
+
 
 ### Links
 * https://www.sitepoint.com/php-authorization-jwt-json-web-tokens/
