@@ -55,30 +55,38 @@ EOD;
 		<script type="text/javascript">
 			$(function(){
 				var App = App || {};
+
 				App.init = {
-					api_url: 		'ROOT\/?rex-api-call=restfull_api&func=ext',
-					api_hash: 		'aWQ9MSZrZXk9NzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTg=';
+					api_obj: {
+						id: 1,
+						key: '77a01054c185818606aa077cb7ac1b58'
+					},
+					api_url: 'ROOT\/?rex-api-call=restfull_api',
+					api_hash: 'eyJpZCI6MSwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ==',
 					/*
 					 * -----------------------------------------------------------------------------
 					 * Set Data with 'btoa' or in PHP with 'base64_encode()'
 					 * Get Data with 'atob' or in PHP with 'base64_decode()'
-					 * api_user_id 	= 1;
- 					 * api_user_key = '77a01054c185818606aa077cb7ac1b58';
-					 * api_hash 	= btoa('id='+api_user_id+'&key='+api_user_key);
+					 * api_obj: {
+	 				 *		id: 1,
+	 				 *		key: '77a01054c185818606aa077cb7ac1b58'
+	 				 *	},
+					 * api_hash = btoa(api_obj);
 					 * -----------------------------------------------------------------------------
-					 * get this hash 'aWQ9MSZrZXk9NzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTg='
+					 * get this hash 'eyJpZCI6MSwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ=='
 					 * -----------------------------------------------------------------------------
 					 */
 
 					login: function () {
-						// alert(this.user_api);
-						let hash_btoa = btoa('id='+this.api_user_id+'&key='+this.api_user_key);
-						let hash_atob = atob(hash_btoa);
+						// let hash_btoa = btoa('id='+this.api_user_id+'&key='+this.api_user_key);
+						// let hash_atob = atob(hash_btoa);
+
+						let hash_btoa = btoa(JSON.stringify(this.api_obj));
 
 						reqwest({
 							url: this.api_url,
 							method: 'post',
-							data: { hash: hash_btoa },
+							data: { hash: hash_btoa, func: 'auth' },
 							success: function (resp) {
 								// qwery('#content').html(resp)
 							}
@@ -92,6 +100,7 @@ EOD;
 		</script>
 	</body>
 </html>
+
 ```
 
 
@@ -104,6 +113,7 @@ EOD;
 * https://jwt.io
 * https://developers.triathlon.org/docs/responses-and-status-codes
 * https://httpstatuses.com/200
+* https://github.com/ded/Reqwest
 
 
 ### Todo

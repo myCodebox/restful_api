@@ -21,17 +21,13 @@
 
 		public function execute()
 		{
-			$this->setConfig();
-
-			$func = rex_get('func', 'string');
-
 			$message = '';
 
-			if( $func == 'ext' ) {
-				$message = $this->isOK();
-			} else {
-				$message = $this->isNOK();
-			}
+			// set the config from redaxo
+			$this->setConfig();
+
+			// test request
+			$message = self::isRequest();
 
 			// if( $this->setUser() && rex_request::requestMethod() == 'post' && $this->jwt_active ) {
 			// 	$message = $this->getJWT();
@@ -44,21 +40,18 @@
 		}
 
 
-		private function isOK()
-		{
-			$btoa = rex_request('hash', 'string');
-			$hash = base64_decode($btoa);
-			header('Content-Type: application/json');
-			header('HTTP/1.1 200 OK');
-			echo json_encode(['OK', $hash]);
-			exit;
-		}
-		private function isNOK()
-		{
-			header('Content-Type: application/json');
-			header('HTTP/1.1 401 Unauthorized');
-			echo json_encode(['NOK']);
-			exit;
+		private static function isRequest() {
+			$btoa 		= rex_request('hash', 'string');
+			$json_str 	= base64_decode($btoa);
+			$json_arr 	= json_decode($json_str, true);
+
+			if( is_array($json_arr) && count($json_arr) > 0 ) {
+				self::makeRequest(200, $json_arr);
+			} else {
+				self::makeRequest(400);
+			}
+
+
 		}
 
 
@@ -70,72 +63,114 @@
 		}
 
 
-		private function setUser()
+		// REQUEST BODY = hash: eyJpZCI6MSwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgiLCJmdW5jIjoiYXV0aCJ9
+		private static function makeRequest($code, $data = null)
 		{
-			$user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
-			if( $user ) {
-				$this->user_id = $user->getId();
-				$this->user_type = (rex::isBackend()) ? 'backend' : 'frontend';
+			$header = '';
+			switch ($code) {
+			    case 200: $header = 'Everything is OK'; break;
+			    case 201: $header = 'Created Successfully'; break;
+			    case 202: $header = 'Accepted'; break;
+			    case 204: $header = 'No Content'; break;
+			    case 301: $header = 'Moved Permanently'; break;
+			    case 400: $header = 'Bad Request'; break;
+			    case 401: $header = 'Unauthorized'; break;
+			    case 404: $header = 'Not Found'; break;
+			    case 500: $header = 'Internal Server Error'; break;
 			}
-			return $user;
+
+			$status = '';
+			switch ((int)substr($code, 0, 1)) {
+				case 2: $status = 'success'; break;
+			    case 3: $status = 'move'; break;
+			    case 4: $status = 'fail'; break;
+			    case 5: $status = 'error'; break;
+			}
+
+			$json = [
+				'code' => $code,
+				'status' => $status,
+				'data' => $data
+			];
+
+			if(isset($header)) {
+				header('Content-Type: application/json');
+				header('HTTP/1.1 '.$code.' '.$header);
+				echo json_encode($json);
+				exit;
+			}
 		}
 
 
-		public function getJWT()
-		{
-			$tokenId    = base64_encode(mcrypt_create_iv(32));
-			$issuedAt   = time();
-			$notBefore  = $issuedAt + 10;  		// Adding 10 seconds
-			$expire     = $notBefore + 60; 		// Adding 60 seconds
-			$serverName = rex::getServer(); 	// Adding the server URL.
-
-			$data = [
-				'iat'  => $issuedAt,         			// Issued at: time when the token was generated
-				'jti'  => $tokenId,          			// Json Token Id: an unique identifier for the token
-				'iss'  => $serverName,       			// Issuer
-				'nbf'  => $notBefore,        			// Not before
-				'exp'  => $expire,           			// Expire
-				'data' => [                  			// Data related to the signer user
-					'user_id' 	=> $this->user_id, 		// userid from the users table
-					'user_type' => $this->user_type, 	// User name
-				]
-			];
-
-			$secretKey = base64_decode($this->jwt_secretKey);
-            $algorithm = $this->jwt_algorithm;
-            $jwt = JWT::encode(
-                $data,      //Data to be encoded in the JWT
-                $secretKey, // The signing key
-                $algorithm  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
-            );
-
-            $unencodedArray = [
-				'code' 		=> 200,
-				'status' 	=> 'success',
-				'message' 	=> 'The request has succeeded.',
-				'jwt' 		=> $jwt
-			];
-
-			header('Content-Type: application/json');
-			header('HTTP/1.1 200 OK');
-			echo json_encode($unencodedArray);
-			exit;
-		}
 
 
-		public function getJWTerror()
-		{
-			$data = [
-				'code' => 401,
-				'status' => 'fail',
-				'message' => 'The request has not been applied because it lacks valid authentication credentials for the target resource.',
-			];
 
-			header('Content-Type: application/json');
-			header('HTTP/1.1 401 Unauthorized');
-			echo json_encode($data);
-			exit;
-		}
+		// private function setUser()
+		// {
+		// 	$user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
+		// 	if( $user ) {
+		// 		$this->user_id = $user->getId();
+		// 		$this->user_type = (rex::isBackend()) ? 'backend' : 'frontend';
+		// 	}
+		// 	return $user;
+		// }
+		//
+		//
+		// public function getJWT()
+		// {
+		// 	$tokenId    = base64_encode(mcrypt_create_iv(32));
+		// 	$issuedAt   = time();
+		// 	$notBefore  = $issuedAt + 10;  		// Adding 10 seconds
+		// 	$expire     = $notBefore + 60; 		// Adding 60 seconds
+		// 	$serverName = rex::getServer(); 	// Adding the server URL.
+		//
+		// 	$data = [
+		// 		'iat'  => $issuedAt,         			// Issued at: time when the token was generated
+		// 		'jti'  => $tokenId,          			// Json Token Id: an unique identifier for the token
+		// 		'iss'  => $serverName,       			// Issuer
+		// 		'nbf'  => $notBefore,        			// Not before
+		// 		'exp'  => $expire,           			// Expire
+		// 		'data' => [                  			// Data related to the signer user
+		// 			'user_id' 	=> $this->user_id, 		// userid from the users table
+		// 			'user_type' => $this->user_type, 	// User name
+		// 		]
+		// 	];
+		//
+		// 	$secretKey = base64_decode($this->jwt_secretKey);
+        //     $algorithm = $this->jwt_algorithm;
+        //     $jwt = JWT::encode(
+        //         $data,      //Data to be encoded in the JWT
+        //         $secretKey, // The signing key
+        //         $algorithm  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+        //     );
+		//
+        //     $unencodedArray = [
+		// 		'code' 		=> 200,
+		// 		'status' 	=> 'success',
+		// 		'message' 	=> 'The request has succeeded.',
+		// 		'jwt' 		=> $jwt
+		// 	];
+		//
+		// 	header('Content-Type: application/json');
+		// 	header('HTTP/1.1 200 OK');
+		// 	echo json_encode($unencodedArray);
+		// 	exit;
+		// }
+		//
+		//
+		// public function getJWTerror()
+		// {
+		// 	$data = [
+		// 		'code' => 401,
+		// 		'status' => 'fail',
+		// 		'message' => 'The request has not been applied because it lacks valid authentication credentials for the target resource.',
+		// 	];
+		//
+		// 	header('Content-Type: application/json');
+		// 	header('HTTP/1.1 401 Unauthorized');
+		// 	echo json_encode($data);
+		// 	exit;
+		// }
 
 
 	}
