@@ -7,19 +7,28 @@
 	class rex_api_restfull_api extends rex_api_function {
 
 		// open the frontend
-		protected $published = true;
-		// Key for signing the JWT's, I suggest generate it with base64_encode(openssl_random_pseudo_bytes(64))
-		protected $jwt_key = 'Uj36/hlAhFDEzapgbYOxGs+RuEdTo4o+g/UVGHs/vCgbr1mSMjV926LECAGcEKPpw+MzWkAgsNo/C613y0Bogw==';
-		// Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
-		protected $jwt_algorithm = 'HS256';
-		protected $user_id = null;
-		protected $user_type = null;
+		protected $published 		= true;
+
+		// CONFIG Data
+		protected $jwt_frontend 	= false;
+		protected $jwt_secretKey 	= null;
+		protected $jwt_algorithm 	= 'HS256';
+
+		// USER Data
+		protected $user_id 			= null;
+		protected $user_type 		= null;
 
 
 		public function execute()
 		{
+			$this->setConfig();
+
 			$message = '';
-			if( $this->setUser() && rex_request::requestMethod() == 'post' ) {
+			if(
+				$this->setUser()
+				&& rex_request::requestMethod() == 'post'
+				&& $this->jwt_frontend
+			) {
 				$message = $this->getJWT();
 			} else {
 				$message = $this->getJWTerror();
@@ -30,9 +39,16 @@
 		}
 
 
+		private function setConfig() {
+			$addon = rex_addon::get('restful_api');
+			$this->jwt_frontend 	= $addon->getConfig('restful_api_frontend');
+			$this->jwt_secretKey 	= $addon->getConfig('restful_api_secretKey');
+			$this->jwt_algorithm 	= $addon->getConfig('restful_api_algorithm');
+		}
+
+
 		private function setUser()
 		{
-			// $ycom = (rex_addon::exist('ycom')) ? rex_ycom_auth::getUser() : null;
 			$user = (rex::isBackend()) ? rex::getUser() : rex_ycom_auth::getUser();
 			if( $user ) {
 				$this->user_id = $user->getId();
@@ -62,7 +78,7 @@
 				]
 			];
 
-			$secretKey = base64_decode($this->jwt_key);
+			$secretKey = base64_decode($this->jwt_secretKey);
             $algorithm = $this->jwt_algorithm;
             $jwt = JWT::encode(
                 $data,      //Data to be encoded in the JWT

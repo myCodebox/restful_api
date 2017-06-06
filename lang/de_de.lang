@@ -1,7 +1,15 @@
 navigation_codebox = Codebox
 
+
 restful_api_title = Restful API für Redaxo 5
 
+
+// SEITEN
 restful_api_overview 	= Übersicht
 restful_api_settings 	= Einstellungen
 restful_api_info 		= Info
+
+
+// EINSTELLUNGEN
+restful_api_save_btn 	= Speichern
+restful_api_frontend 	= Frontend Anfrage
