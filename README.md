@@ -50,19 +50,29 @@ EOD;
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.min.js"></script>
 	</head>
 	<body>
-
+		<pre class="req"></pre>
+		<pre class="jwt"></pre>
+		<pre class="claim"></pre>
+		<pre class="data"></pre>
 
 		<script type="text/javascript">
 			$(function(){
 				var App = App || {};
 
+				App.decodeToken = function(jwt){
+					var a = jwt.split(".");
+					return  b64utos(a[1]);
+				}
+
+				App.setJwt = function(data){
+					this.jwt = data;
+					this.claim = this.decodeToken(data);
+				}
+
 				App.init = {
-					api_obj: {
-						id: 4,
-						key: '77a01054c185818606aa077cb7ac1b58'
-					},
+					api_obj: {id:4,key:'77a01054c185818606aa077cb7ac1b58'},
 					api_url: 'ROOT\/?rex-api-call=restfull_api',
-					api_hash: 'eyJpZCI6MSwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ==',
+					api_hash: 'eyJpZCI6NCwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ==',
 					/*
 					 * -----------------------------------------------------------------------------
 					 * Set Data with 'btoa' or in PHP with 'base64_encode()'
@@ -73,22 +83,27 @@ EOD;
 	 				 *	},
 					 * api_hash = btoa(api_obj);
 					 * -----------------------------------------------------------------------------
-					 * get this hash 'eyJpZCI6MSwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ=='
+					 * get this hash 'eyJpZCI6NCwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ=='
 					 * -----------------------------------------------------------------------------
 					 */
 
 					login: function () {
-						// let hash_btoa = btoa('id='+this.api_user_id+'&key='+this.api_user_key);
-						// let hash_atob = atob(hash_btoa);
-
 						let hash_btoa = btoa(JSON.stringify(this.api_obj));
-
 						reqwest({
 							url: this.api_url,
 							method: 'post',
 							data: { hash: hash_btoa, func: 'auth' },
-							success: function (resp) {
-								// qwery('#content').html(resp)
+							success: function (req) {
+								App.setJwt(req.data);
+
+								var req_str = JSON.stringify(req);
+								$('.req').html( req_str );
+								$('.jwt').html( App.data );
+								$('.claim').html( App.claim );
+
+								var parsedJSON = JSON.parse(App.claim);
+								var parsedJSON_str = JSON.stringify(parsedJSON.data);
+								$('.data').html( parsedJSON_str );
 							}
 						})
 					},
@@ -100,6 +115,7 @@ EOD;
 		</script>
 	</body>
 </html>
+
 ```
 
 

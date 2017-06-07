@@ -27,7 +27,7 @@
 			$this->setConfig();
 
 			// test request
-			$message = self::isRequest();
+			$message = $this->isRequest();
 
 			// result
 			$result = new rex_api_result(true, $message);
@@ -35,21 +35,21 @@
 		}
 
 
-		private static function isRequest() {
+		private function isRequest() {
 			$func		= rex_request('func', 'string');
 			$hash_b64	= rex_request('hash', 'string');
 			$json_str 	= base64_decode($hash_b64);
 			$json_arr 	= json_decode($json_str, true);
 
 			if( is_array($json_arr) && count($json_arr) > 0 ) {
-				self::testUser($json_arr);
+				$this->testUser($json_arr);
 			} else {
-				self::makeRequest(400);
+				$this->makeRequest(400);
 			}
 		}
 
 
-		private static function testUser($json_arr)
+		private function testUser($json_arr)
 		{
 			$sql = rex_sql::factory();
 			$sql->setDebug(false);
@@ -58,15 +58,16 @@
 			$sql->select();
 
 			if($sql->getRows()) {
-				self::getJWT($json_arr);
+				$this->getJWT($json_arr);
 			} else {
-				self::makeRequest(400);
+				$this->makeRequest(400);
 			}
 		}
 
 
-		private static function getJWT($json_arr)
+		private function getJWT($json_arr)
 		{
+			$jwt = null;
 			$tokenId    = base64_encode(mcrypt_create_iv(32));
 			$issuedAt   = time();
 			$notBefore  = $issuedAt + 10;  		// Adding 10 seconds
@@ -81,7 +82,7 @@
 				'exp'  => $expire,     // Expire
 				'data' => $json_arr    // Data related to the signer user
 			];
-			//
+
 			$secretKey = base64_decode($this->jwt_secretKey);
 		    $algorithm = $this->jwt_algorithm;
 		    $jwt = JWT::encode(
@@ -103,7 +104,7 @@
 
 
 		// REQUEST BODY = hash: eyJpZCI6MSwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgiLCJmdW5jIjoiYXV0aCJ9
-		private static function makeRequest($code, $data = null)
+		private function makeRequest($code, $data = null)
 		{
 			$header = '';
 			switch ($code) {
