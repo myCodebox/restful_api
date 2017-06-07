@@ -29,29 +29,68 @@
 			// test request
 			$message = self::isRequest();
 
-			// if( $this->setUser() && rex_request::requestMethod() == 'post' && $this->jwt_active ) {
-			// 	$message = $this->getJWT();
-			// } else {
-			// 	$message = $this->getJWTerror();
-			// }
-
+			// result
 			$result = new rex_api_result(true, $message);
 			return $result;
 		}
 
 
 		private static function isRequest() {
-			$btoa 		= rex_request('hash', 'string');
-			$json_str 	= base64_decode($btoa);
+			$func		= rex_request('func', 'string');
+			$hash_b64	= rex_request('hash', 'string');
+			$json_str 	= base64_decode($hash_b64);
 			$json_arr 	= json_decode($json_str, true);
 
 			if( is_array($json_arr) && count($json_arr) > 0 ) {
-				self::makeRequest(200, $json_arr);
+				self::testUser($json_arr);
 			} else {
 				self::makeRequest(400);
 			}
+		}
 
 
+		private static function testUser($json_arr)
+		{
+			$sql = rex_sql::factory();
+			$sql->setDebug(false);
+			$sql->setTable(rex::getTablePrefix().'ycom_user');
+			$sql->setWhere( ['id' => $json_arr['id'], 'activation_key' => $json_arr['key']] );
+			$sql->select();
+
+			if($sql->getRows()) {
+				self::getJWT($json_arr);
+			} else {
+				self::makeRequest(400);
+			}
+		}
+
+
+		private static function getJWT($json_arr)
+		{
+			$tokenId    = base64_encode(mcrypt_create_iv(32));
+			$issuedAt   = time();
+			$notBefore  = $issuedAt + 10;  		// Adding 10 seconds
+			$expire     = $notBefore + 60; 		// Adding 60 seconds
+			$serverName = rex::getServer(); 	// Adding the server URL.
+
+			$data = [
+				'iat'  => $issuedAt,   // Issued at: time when the token was generated
+				'jti'  => $tokenId,    // Json Token Id: an unique identifier for the token
+				'iss'  => $serverName, // Issuer
+				'nbf'  => $notBefore,  // Not before
+				'exp'  => $expire,     // Expire
+				'data' => $json_arr    // Data related to the signer user
+			];
+			//
+			$secretKey = base64_decode($this->jwt_secretKey);
+		    $algorithm = $this->jwt_algorithm;
+		    $jwt = JWT::encode(
+		        $data,      //Data to be encoded in the JWT
+		        $secretKey, // The signing key
+		        $algorithm  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+		    );
+
+			self::makeRequest(200, $jwt);
 		}
 
 

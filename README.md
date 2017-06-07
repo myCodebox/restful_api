@@ -58,7 +58,7 @@ EOD;
 
 				App.init = {
 					api_obj: {
-						id: 1,
+						id: 4,
 						key: '77a01054c185818606aa077cb7ac1b58'
 					},
 					api_url: 'ROOT\/?rex-api-call=restfull_api',
@@ -68,7 +68,7 @@ EOD;
 					 * Set Data with 'btoa' or in PHP with 'base64_encode()'
 					 * Get Data with 'atob' or in PHP with 'base64_decode()'
 					 * api_obj: {
-	 				 *		id: 1,
+	 				 *		id: 4,
 	 				 *		key: '77a01054c185818606aa077cb7ac1b58'
 	 				 *	},
 					 * api_hash = btoa(api_obj);
@@ -100,7 +100,6 @@ EOD;
 		</script>
 	</body>
 </html>
-
 ```
 
 
