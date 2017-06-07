@@ -136,11 +136,11 @@ Update the 'ROOT' in the 'this.url = 'ROOT\/?rex-api-call=restfull_api'
 							App.setJwt(res.data);
 							$('.token_code').text(res.code);
 							$('.jwt').text(res.data);
-
 						},
 						error: function (err) {
 							$('.token_code').text(err.status+' '+err.statusText);
 							$('.jwt').text('');
+							App.jwt = null;
 						}
 					});
 				};
@@ -168,8 +168,6 @@ Update the 'ROOT' in the 'this.url = 'ROOT\/?rex-api-call=restfull_api'
 		</script>
 	</body>
 </html>
-
-
 ```
 
 

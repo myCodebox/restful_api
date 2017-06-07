@@ -13,6 +13,8 @@
 		protected $jwt_active 		= false;
 		protected $jwt_secretKey 	= null;
 		protected $jwt_algorithm 	= 'HS256';
+		protected $addNotBefore 	= 5;
+		protected $addExpire 		= 5;
 
 		// USER Data
 		protected $user_id 			= null;
@@ -50,7 +52,6 @@
 			}
 
 			if( $func == 'getdata') {
-
 				$jwt = $this->getBearerToken();
 				if ($jwt) {
 					try {
@@ -62,55 +63,23 @@
 							$secretKey,
 							array($algorithm)
 						);
-
-						$asset = base64_encode(file_get_contents('http://lorempixel.com/200/300/cats/'));
-
-						$this->makeRequest(200, ['img' => $asset]);						
+						$decoded_arr = (array) $decoded;
+						$now = time();
+						$exp = $decoded_arr['exp'];
+						$left = ($exp-$now);
+						if( $left > 0 ) {
+							$asset = base64_encode(file_get_contents('http://lorempixel.com/200/300/cats/'));
+							$this->makeRequest(200, ['img' => $asset, 'left' => $left]);
+						} else {
+							$this->makeRequest(401, ['left' => $left]);
+						}
 					} catch (Exception $e) {
-						$this->makeRequest(401);
+						$this->makeRequest(405);
 					}
 				} else {
-					$this->makeRequest(400);
+					$this->makeRequest(405);
 				}
-
-				// list($jwt) = sscanf( $authHeader->toString(), 'Authorization: Bearer %s');
-        		// if ($jwt) {
-				// 	try {
-				// 		$secretKey = base64_decode($this->jwt_secretKey);
-				// 		$algorithm = $this->jwt_algorithm;
-				// 		JWT::$leeway = 60; // $leeway in seconds
-				// 		$decoded = JWT::decode(
-				// 			$jwt,
-				// 			$secretKey,
-				// 			array($algorithm)
-				// 		);
-				//
-				// 		$this->makeRequest(200, $decoded);
-				// 	} catch (Exception $e) {
-				// 		$this->makeRequest(401);
-				// 	}
-				// } else {
-				// 	$this->makeRequest(400);
-				// }
-
-
-				// $jwt = $this->getBearerToken();
-				// if(isset($jwt) && !is_null($jwt)) {
-				// 	$secretKey = base64_decode($this->jwt_secretKey);
-				//     $algorithm = $this->jwt_algorithm;
-				// 	JWT::$leeway = 60; // $leeway in seconds
-				// 	$decoded = JWT::decode(
-				// 		$jwt,
-				// 		$secretKey,
-				// 		array($algorithm)
-				// 	);
-				//
-				// 	$this->makeRequest(200, $decoded);
-				// } else {
-				// 	$this->makeRequest(401);
-				// }
 			}
-
 			$this->makeRequest(400);
 		}
 
@@ -172,9 +141,9 @@
 			$jwt = null;
 			$tokenId    = base64_encode(mcrypt_create_iv(32));
 			$issuedAt   = time();
-			$notBefore  = $issuedAt + 10;  		// Adding 10 seconds
-			$expire     = $notBefore + 60; 		// Adding 60 seconds
-			$serverName = rex::getServer(); 	// Adding the server URL.
+			$notBefore  = $issuedAt + $this->addNotBefore;  // Adding 10 seconds
+			$expire     = $notBefore + $this->addExpire; 	// Adding 60 seconds
+			$serverName = rex::getServer(); 				// Adding the server URL.
 
 			$data = [
 				'iat'  => $issuedAt,   // Issued at: time when the token was generated
