@@ -36,16 +36,118 @@
 
 
 		private function isRequest() {
-			$func		= rex_request('func', 'string');
-			$hash_b64	= rex_request('hash', 'string');
-			$json_str 	= base64_decode($hash_b64);
-			$json_arr 	= json_decode($json_str, true);
+			$func = rex_request('func', 'string');
 
-			if( is_array($json_arr) && count($json_arr) > 0 ) {
-				$this->testUser($json_arr);
-			} else {
-				$this->makeRequest(400);
+			if( $func == 'getauth') {
+				$hash_b64	= rex_request('hash', 'string');
+				$json_str 	= base64_decode($hash_b64);
+				$json_arr 	= json_decode($json_str, true);
+				if( is_array($json_arr) && count($json_arr) > 0 ) {
+					$this->testUser($json_arr);
+				} else {
+					$this->makeRequest(400);
+				}
 			}
+
+			if( $func == 'getdata') {
+
+				$jwt = $this->getBearerToken();
+				if ($jwt) {
+					try {
+						$secretKey = base64_decode($this->jwt_secretKey);
+						$algorithm = $this->jwt_algorithm;
+						JWT::$leeway = 60; // $leeway in seconds
+						$decoded = JWT::decode(
+							$jwt,
+							$secretKey,
+							array($algorithm)
+						);
+
+						$asset = base64_encode(file_get_contents('http://lorempixel.com/200/300/cats/'));
+
+						$this->makeRequest(200, ['img' => $asset]);						
+					} catch (Exception $e) {
+						$this->makeRequest(401);
+					}
+				} else {
+					$this->makeRequest(400);
+				}
+
+				// list($jwt) = sscanf( $authHeader->toString(), 'Authorization: Bearer %s');
+        		// if ($jwt) {
+				// 	try {
+				// 		$secretKey = base64_decode($this->jwt_secretKey);
+				// 		$algorithm = $this->jwt_algorithm;
+				// 		JWT::$leeway = 60; // $leeway in seconds
+				// 		$decoded = JWT::decode(
+				// 			$jwt,
+				// 			$secretKey,
+				// 			array($algorithm)
+				// 		);
+				//
+				// 		$this->makeRequest(200, $decoded);
+				// 	} catch (Exception $e) {
+				// 		$this->makeRequest(401);
+				// 	}
+				// } else {
+				// 	$this->makeRequest(400);
+				// }
+
+
+				// $jwt = $this->getBearerToken();
+				// if(isset($jwt) && !is_null($jwt)) {
+				// 	$secretKey = base64_decode($this->jwt_secretKey);
+				//     $algorithm = $this->jwt_algorithm;
+				// 	JWT::$leeway = 60; // $leeway in seconds
+				// 	$decoded = JWT::decode(
+				// 		$jwt,
+				// 		$secretKey,
+				// 		array($algorithm)
+				// 	);
+				//
+				// 	$this->makeRequest(200, $decoded);
+				// } else {
+				// 	$this->makeRequest(401);
+				// }
+			}
+
+			$this->makeRequest(400);
+		}
+
+
+		/**
+		 * Get hearder Authorization
+		 * */
+		private function getAuthorizationHeader(){
+		    $headers = null;
+		    if (isset($_SERVER['Authorization'])) {
+		        $headers = trim($_SERVER["Authorization"]);
+		    }
+		    else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
+		        $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
+		    } elseif (function_exists('apache_request_headers')) {
+		        $requestHeaders = apache_request_headers();
+		        // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+		        $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+		        //print_r($requestHeaders);
+		        if (isset($requestHeaders['Authorization'])) {
+		            $headers = trim($requestHeaders['Authorization']);
+		        }
+		    }
+		    return $headers;
+		}
+		/**
+		 * get access token from header
+		 * */
+		private function getBearerToken() {
+		    $headers = $this->getAuthorizationHeader();
+		    // HEADER: Get the access token from the header
+		    if (!empty($headers)) {
+		        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+		            return $matches[1];
+		        }
+		    }
+		    return null;
 		}
 
 
@@ -54,13 +156,13 @@
 			$sql = rex_sql::factory();
 			$sql->setDebug(false);
 			$sql->setTable(rex::getTablePrefix().'ycom_user');
-			$sql->setWhere( ['id' => $json_arr['id'], 'activation_key' => $json_arr['key']] );
+			$sql->setWhere( ['id' => $json_arr['id'], 'activation_key' => $json_arr['key'], 'status' => 1]);
 			$sql->select();
 
 			if($sql->getRows()) {
 				$this->getJWT($json_arr);
 			} else {
-				$this->makeRequest(400);
+				$this->makeRequest(401);
 			}
 		}
 
@@ -108,7 +210,7 @@
 		{
 			$header = '';
 			switch ($code) {
-			    case 200: $header = 'Everything is OK'; break;
+			    case 200: $header = 'OK'; break;
 			    case 201: $header = 'Created Successfully'; break;
 			    case 202: $header = 'Accepted'; break;
 			    case 204: $header = 'No Content'; break;

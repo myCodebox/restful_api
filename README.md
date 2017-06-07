@@ -50,14 +50,70 @@ EOD;
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.min.js"></script>
 	</head>
 	<body>
-		<pre class="req"></pre>
-		<pre class="jwt"></pre>
-		<pre class="claim"></pre>
-		<pre class="data"></pre>
+
+
+		<fieldset>
+			<legend>Login</legend>
+			<form action="api_test.html" id="getlogin" method="post">
+				<label for="id">ID:</label><input type="text" id="id" name="id" value="4">
+				<label for="key">KEY:</label><input type="text" id="key" name="key" value="77a01054c185818606aa077cb7ac1b58">
+				<button type="submit" name="submit">Get Token</button>
+			</form>
+		</fieldset>
+		<br />
+		<fieldset>
+			<legend>Token</legend>
+			<form action="api_test.html" id="getdata" method="post">
+				<label for="jwt">JWT:</label> [ Status <span class="token_code">0</span> ]<br />
+				<textarea class="jwt" id="token" name ="token" rows="6" cols="52"></textarea>
+				<button type="submit" name="submit">Get Data</button>
+			</form>
+		</fieldset>
+		<br />
+		<fieldset>
+			<legend>Get Data with the Token</legend>
+			<label for="data">Data:</label> [ Status <span class="data_code">0</span> ]<br />
+			<span class="img"></span>
+			<!-- <textarea class="data" id="data" name ="data" rows="6" cols="52"></textarea> -->
+		</fieldset>
+
 
 		<script type="text/javascript">
-			$(function(){
+			(function () {
+				"use strict";
+
 				var App = App || {};
+
+
+				App.init = function () {
+					this.url = 'ROOT\/?rex-api-call=restfull_api';
+					this.hash = null;
+					this.iat = null;
+					this.nbf = null;
+					this.exp = null;
+				}
+
+
+				var getlogin = document.getElementById('getlogin');
+				getlogin.addEventListener('submit', function(e){
+					e.preventDefault();
+					App.getlogin();
+				}, false);
+
+				var getlogin = document.getElementById('getdata');
+				getdata.addEventListener('submit', function(e){
+					e.preventDefault();
+					App.getdata();
+				}, false);
+
+
+				App.setHash = function() {
+					let arr = $('#getlogin').serializeArray(), hash = {};
+					for (var i = 0; i < arr.length; i++) {
+						hash[arr[i].name] = arr[i].value;
+					}
+					this.hash = btoa(JSON.stringify(hash));
+				};
 
 				App.decodeToken = function(jwt){
 					var a = jwt.split(".");
@@ -69,52 +125,49 @@ EOD;
 					this.claim = this.decodeToken(data);
 				}
 
-				App.init = {
-					api_obj: {id:4,key:'77a01054c185818606aa077cb7ac1b58'},
-					api_url: 'ROOT\/?rex-api-call=restfull_api',
-					api_hash: 'eyJpZCI6NCwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ==',
-					/*
-					 * -----------------------------------------------------------------------------
-					 * Set Data with 'btoa' or in PHP with 'base64_encode()'
-					 * Get Data with 'atob' or in PHP with 'base64_decode()'
-					 * api_obj: {
-	 				 *		id: 4,
-	 				 *		key: '77a01054c185818606aa077cb7ac1b58'
-	 				 *	},
-					 * api_hash = btoa(api_obj);
-					 * -----------------------------------------------------------------------------
-					 * get this hash 'eyJpZCI6NCwia2V5IjoiNzdhMDEwNTRjMTg1ODE4NjA2YWEwNzdjYjdhYzFiNTgifQ=='
-					 * -----------------------------------------------------------------------------
-					 */
+				App.getlogin = function () {
+					this.setHash();
+					reqwest({
+						url: App.url,
+						method: 'post',
+						data: { hash: App.hash, func: 'getauth' },
+						success: function (res) {
+							App.setJwt(res.data);
+							$('.token_code').text(res.code);
+							$('.jwt').text(res.data);
 
-					login: function () {
-						let hash_btoa = btoa(JSON.stringify(this.api_obj));
-						reqwest({
-							url: this.api_url,
-							method: 'post',
-							data: { hash: hash_btoa, func: 'auth' },
-							success: function (req) {
-								App.setJwt(req.data);
+						},
+						error: function (err) {
+							$('.token_code').text(err.status+' '+err.statusText);
+							$('.jwt').text('');
+						}
+					});
+				};
+				App.getdata = function () {
+					var token = $('.jwt').val()
+					reqwest({
+						url: App.url,
+						method: 'post',
+						data: { hash: App.hash, func: 'getdata' },
+						headers: {'Authorization':'Bearer '+App.jwt},
+						success: function (res) {
+							$('.data_code').text(res.code);
+							// $('.data').text(res.data.img);
+							$('.img').html('<img src="data:image/jpeg;base64,' + res.data.img + '" />');
+						},
+						error: function (err) {
+							$('.data_code').text(err.status+' '+err.statusText);
+							$('.data').text('');
+						}
+					});
+				};
 
-								var req_str = JSON.stringify(req);
-								$('.req').html( req_str );
-								$('.jwt').html( App.data );
-								$('.claim').html( App.claim );
-
-								var parsedJSON = JSON.parse(App.claim);
-								var parsedJSON_str = JSON.stringify(parsedJSON.data);
-								$('.data').html( parsedJSON_str );
-							}
-						})
-					},
-				}
-
-				App.init.login();
-			});
-
+				App.init();
+			})();
 		</script>
 	</body>
 </html>
+
 
 ```
 
@@ -129,6 +182,11 @@ EOD;
 * https://developers.triathlon.org/docs/responses-and-status-codes
 * https://httpstatuses.com/200
 * https://github.com/ded/Reqwest
+
+#### More Links
+* https://github.com/myCodebox/sp-simple-jwt/blob/master/public/js/main.js
+* https://github.com/myCodebox/sp-simple-jwt/blob/master/public/resource.php
+* https://github.com/myCodebox/php-jwt
 
 
 ### Todo
