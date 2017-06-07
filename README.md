@@ -39,6 +39,7 @@ EOD;
 ```
 
 ### HTML Test page
+Update the 'ROOT' in the 'this.url = 'ROOT\/?rex-api-call=restfull_api'
 ```html
 <!DOCTYPE html>
 <html>
