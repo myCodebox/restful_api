@@ -186,6 +186,7 @@ Update the 'ROOT' in the 'this.url = 'ROOT\/?rex-api-call=restfull_api'
 * https://github.com/myCodebox/sp-simple-jwt/blob/master/public/js/main.js
 * https://github.com/myCodebox/sp-simple-jwt/blob/master/public/resource.php
 * https://github.com/myCodebox/php-jwt
+* https://path.com/developers#auth
 
 
 ### Todo
