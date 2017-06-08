@@ -97,6 +97,8 @@
 		// 			$include = "\n";
 		// 			$include .= '#start:restful_api'."\n";
 		// 			$include .= 'RewriteRule ^api/ %{ENV:BASE}/index.php?rex-api-call=restfull_api [NC,L]'."\n";
+		// 			$include .= 'RewriteRule ^api/auth/ %{ENV:BASE}/index.php?rex-api-call=restfull_api [NC,L]'."\n";
+		// 			$include .= 'RewriteRule ^api/.* %{ENV:BASE}/index.php?rex-api-call=restfull_api&path=$1 [NC,L]'."\n";
 		// 			$include .= '#end:restful_api'."\n";
 		// 			$newfile = str_replace($search, $search.$include, $file);
 		// 			return true;

@@ -25,16 +25,6 @@
 
 	$content .= '<div class="container-fluid">
 			<div class="col-xs-12">
-				<h3>.htaccess Datei setzen</h3>
-				<p>
-					Um RESTFUL_API lauffähig zu bekommen, muss eine .htaccess Datei im Root Ordner
-					gesetzt werden. Sollte eine andere .htaccess bereits vorhanden sein, wird diese
-					ersetzt und ist nicht wiederherstellbar.
-				</p>
-				'.restfull_api::setHtaccessButton().'
-				<hr />
-			</div>
-			<div class="col-xs-12">
 				<h3>Addon Einstellungen</h3>
 			</div>
 			<form action="'.rex_url::currentBackendPage().'" method="post" id="restful_api_settings">
@@ -46,6 +36,18 @@
 					<button class="btn btn-save pull-right" type="submit" name="config-submit" value="1" title="'.$this->i18n('restful_api_save_btn').'">'.$this->i18n('restful_api_save_btn').'</button>
 				</div>
 			</form>
+			<div class="col-xs-12">
+				<hr />
+			</div>
+			<div class="col-xs-12">
+				<h3>.htaccess Datei setzen</h3>
+				<p>
+					Um RESTFUL_API lauffähig zu bekommen, muss eine .htaccess Datei im Root Ordner
+					gesetzt werden. Sollte eine andere .htaccess bereits vorhanden sein, wird diese
+					ersetzt und ist nicht wiederherstellbar.
+				</p>
+				'.restfull_api::setHtaccessButton().'
+			</div>
 		</div>';
 
 
