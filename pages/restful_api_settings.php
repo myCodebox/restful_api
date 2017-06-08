@@ -19,34 +19,24 @@
 	$jwt_secretKey	= $this->getConfig('restful_api_secretKey');
 	$jwt_algorithm 	= $this->getConfig('restful_api_algorithm');
 
-	$htaccess_btn = '';
-	if(rex_addon::get('yrewrite')) {
-		$htaccess_btn .= '<div class="col-xs-12">
-				<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-				'.restfull_api::setHtaccess().'
-				<hr />
-			</div>';
 
-		// if(restfull_api::setHtaccess()) {
-		// 	// echo rex_view::success($this->i18n('htaccess_hasbeenset'));
-		// 	echo rex_view::success('Wird eingetragen');
-		// } else {
-		// 	// echo rex_view::success($this->i18n('htaccess_cantbeenset'));
-		// 	echo rex_view::error('Ist schon vorhanden');
-		// }
-	}
+	if(rex_addon::get('yrewrite')) {}
 
 
 	$content .= '<div class="container-fluid">
-			<div>
+			<div class="col-xs-12">
 				<h3>.htaccess Datei setzen</h3>
 				<p>
 					Um RESTFUL_API lauffähig zu bekommen, muss eine .htaccess Datei im Root Ordner
 					gesetzt werden. Sollte eine andere .htaccess bereits vorhanden sein, wird diese
 					ersetzt und ist nicht wiederherstellbar.
 				</p>
+				'.restfull_api::setHtaccessButton().'
+				<hr />
 			</div>
-			'.$htaccess_btn.'
+			<div class="col-xs-12">
+				<h3>Addon Einstellungen</h3>
+			</div>
 			<form action="'.rex_url::currentBackendPage().'" method="post" id="restful_api_settings">
 				<div class="col-xs-8">
 					<input class="rex-form-chk" type="checkbox" id="rex-form-restful_api_active" name="config[restful_api_active]" value="1" '.$jwt_active.' />
