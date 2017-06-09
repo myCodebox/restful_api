@@ -5,8 +5,9 @@ restful_api_title = Restful API für Redaxo 5
 
 
 // SEITEN
-restful_api_overview 	= Übersicht
+restful_api_paths 		= Pfade
 restful_api_settings 	= Einstellungen
+restful_api_overview 	= Übersicht
 restful_api_info 		= Info
 
 
