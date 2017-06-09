@@ -13,7 +13,7 @@
 		// REX_LIST
 		$sql = 'SELECT * FROM '.rex::getTable('restful_api_paths');
 	    $list = rex_list::factory($sql, 100);
-	    $list->setColumnFormat('id', 'Id');
+	    // $list->setColumnFormat('id', 'Id');
 	    $list->addParam('page', 'restful_api/restful_api_paths');
 
 		// REMOVE
@@ -62,11 +62,13 @@
 		$yform->setValueField('textarea', [
 			'function', $this->i18n('form_function_title'),
 			'placeholder' => 'function name(val) { ... }',
-			'attributes'=>'{"class":"form-control codemirror", "odemirror-theme":"paraiso-dark", "codemirror-mode":"php/htmlmixed"}',
+			'attributes'=>'{"class":"form-control codemirror", "odemirror-theme":"eclipse", "codemirror-mode":"php/htmlmixed"}',
+			'',
 			'short'
 		]);
-		$yform->setValidateField('empty', ['function', $this->i18n('form_paths_function_defined')]);
+		// $yform->setValidateField('empty', ['function', $this->i18n('form_function_defined')]);
 
+		$yform->setActionField('db', [rex::getTable('restful_api_paths')]);
 
 		$content = $yform->getForm();
 	}
