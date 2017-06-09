@@ -1,0 +1,21 @@
+# DEFAULT CHARSET
+AddDefaultCharset utf-8
+
+# PREVENT DIRECTORY LISTING
+<IfModule mod_autoindex.c>
+    #Options -Indexes
+</IfModule>
+
+# REWRITING
+<IfModule mod_rewrite.c>
+    # ENABLE REWRITING
+    RewriteEngine On
+
+    # Workaround for RewriteBase
+    # Copied from https://github.com/symfony/symfony-standard/blob/master/web/.htaccess
+    RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+    RewriteRule ^(.*) - [E=BASE:%1]
+
+    # REWRITE RULE FOR API
+    RewriteRule ^api/([a-z0-9/]*) %{ENV:BASE}/index.php?rex-api-call=restfull_api&path=$1 [B]
+</IfModule>
