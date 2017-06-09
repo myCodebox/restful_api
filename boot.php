@@ -17,8 +17,3 @@
 			$ep->setSubject($content);
 		}, 'NORMAL');
 	}
-
-
-	// echo base64_encode(openssl_random_pseudo_bytes(64));
-	// echo '<br />';
-	// echo openssl_random_pseudo_bytes(64);
