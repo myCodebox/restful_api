@@ -34,9 +34,18 @@ if (trim($this->getElement('grid')) != '') {
     }
 
     if (isset($grid[1]) && $grid[1] != '') {
-        $field_before = '<div class="' . trim($grid[1]) . '">';
+        $field_before = '<div class="' . trim($grid[1]) . '">XXX';
         $field_after = '</div>';
     }
+}
+
+$prefix = '';
+if ($this->getElement('prefix') != "") {
+	$prefix = $this->getElement('prefix');
+}
+$suffix= '';
+if ($this->getElement('suffix') != "") {
+	$suffix = $this->getElement('suffix');
 }
 
 $attributes = [
@@ -49,7 +58,19 @@ $attributes = [
 
 $attributes = $this->getAttributeElements($attributes, ['placeholder', 'autocomplete', 'pattern', 'required', 'disabled', 'readonly']);
 
-echo '<div class="'.$class_group.'" id="'.$this->getHTMLId().'">
-<label class="'.implode(" ", $class_label).'" for="'.$this->getFieldId().'">'.$this->getLabel().'</label>
-'.$field_before.'<input '.implode(" ", $attributes).' />'.$notice . $field_after.'
+// echo '<div class="'.$class_group.'" id="'.$this->getHTMLId().'">
+// <label class="'.implode(" ", $class_label).'" for="'.$this->getFieldId().'">'.$this->getLabel().'</label>
+// '.$field_before.'<input '.implode(" ", $attributes).' />'.$notice . $field_after.'
+// </div>';
+
+echo '
+<div class="'.$class_group.'" id="'.$this->getHTMLId().'">
+    <label class="'.implode(" ", $class_label).'" for="'.$this->getFieldId().'">'.$this->getLabel().'</label>
+    '. $field_before.'
+    <div class="input-group">
+		'.$prefix.'
+        <input '.implode(" ", $attributes).' />
+		'.$suffix.'
+    </div>
+    '.$notice . $field_after.'
 </div>';

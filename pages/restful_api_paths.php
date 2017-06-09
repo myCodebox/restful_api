@@ -46,10 +46,9 @@
 	    $yform->setHiddenField('func', $func);
 	    $yform->setHiddenField('save', '1');
 
-		// $yform->setObjectparams('form_ytemplate', 'bootstrap');
-		// $yform->setObjectparams('form_skin', 'bootstrap');
 		$yform->setObjectparams('main_table', rex::getTable('restful_api_paths'));
 
+		// PATH
 		$yform->setValueField('text_extra', [
 			'paths', $this->i18n('form_paths_title'),
 			'placeholder' => 'neuer/pfad/42',
@@ -58,6 +57,15 @@
 		]);
 	    $yform->setValidateField('empty', ['paths', $this->i18n('form_paths_empty_defined')]);
 	    $yform->setValidateField('unique', ['paths', $this->i18n('form_paths_already_defined')]);
+
+		// FUNCTION
+		$yform->setValueField('textarea', [
+			'function', $this->i18n('form_function_title'),
+			'placeholder' => 'function name(val) { ... }',
+			'attributes'=>'{"class":"form-control codemirror", "odemirror-theme":"paraiso-dark", "codemirror-mode":"php/htmlmixed"}',
+			'short'
+		]);
+		$yform->setValidateField('empty', ['function', $this->i18n('form_paths_function_defined')]);
 
 
 		$content = $yform->getForm();

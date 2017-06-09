@@ -19,5 +19,8 @@ restful_api_active 		= Frontend Anfrage
 // PFADE
 form_paths_title			= Pfad
 form_paths_info				= Pfad der bei der API registriert wird zB.: getuserdata/42
-form_paths_empty_defined	= Bitte eine Pfad angeben
+form_paths_empty_defined	= Bitte eine Pfad eintragen
 form_paths_already_defined	= Dieser Pfad ist schon vorhanden
+
+form_function_title 		= Funktion
+form_function_empty_defined	= Bitte eine Funktion eintragen
