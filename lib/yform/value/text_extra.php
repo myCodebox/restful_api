@@ -53,7 +53,6 @@ class rex_yform_value_text_extra extends rex_yform_value_abstract
             'dbtype' => 'text',
             'famous' => true
         );
-
     }
 
     public static function getSearchField($params)
