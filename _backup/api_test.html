@@ -44,8 +44,7 @@
 
 
 				App.init = function () {
-					// this.url = 'http://localhost/meine/Redaxo/com/?rex-api-call=restfull_api';
-					this.url = 'http://localhost/meine/Redaxo/com/api/';
+					this.url = 'http://localhost/meine/Redaxo/01/api/';
 					this.hash = null;
 					this.iat = null;
 					this.nbf = null;
@@ -87,7 +86,7 @@
 				App.getlogin = function () {
 					this.setHash();
 					reqwest({
-						url: App.url,
+						url: App.url+'auth/',
 						method: 'post',
 						data: { hash: App.hash, func: 'getauth' },
 						success: function (res) {
@@ -105,7 +104,7 @@
 				App.getdata = function () {
 					var token = $('.jwt').val()
 					reqwest({
-						url: App.url,
+						url: App.url+'getimage/cat/',
 						method: 'post',
 						data: { hash: App.hash, func: 'getdata' },
 						headers: {'Authorization':'Bearer '+App.jwt},

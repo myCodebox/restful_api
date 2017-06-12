@@ -24,6 +24,7 @@
 
 		public function execute()
 		{
+
 			$message = '';
 			$this->setConfig(); // set the config from redaxo
 			$message = $this->isRequest(); // test request
@@ -32,24 +33,106 @@
 		}
 
 
-
 		private function isRequest() {
 			$path = rex_request('path', 'string');
 			$arr = ['path' => $path];
 
-			switch ($path) {
-				case 'auth': 		$this->makeRequest(200, $arr); break;
-				case 'getuser/4': 	$this->makeRequest(200, $arr); break;
-				default:
-					$this->makeRequest(404, $arr);
-					break;
+			if($path == 'auth/') {
+				$this->getAuth();
+			} else {
+				$this->testAuth();
+				// switch ($path) {
+				// 	case 'getimage/': $this->makeRequest(200, $arr); break;
+				// 	default: $this->makeRequest(404, $arr); break;
+				// }
 			}
-
-
 			exit;
-
 			// $this->makeRequest(200, $arr);
 		}
+
+
+
+
+		private function testAuth()
+		{
+			$jwt = $this->getBearerToken();
+			if ($jwt) {
+				try {
+					$secretKey = base64_decode($this->jwt_secretKey);
+					$algorithm = $this->jwt_algorithm;
+					JWT::$leeway = 60; // $leeway in seconds
+					$decoded = JWT::decode(
+						$jwt,
+						$secretKey,
+						array($algorithm)
+					);
+					$decoded_arr = (array) $decoded;
+					$this->makeRequest(200, $decoded_arr);
+				} catch (Exception $e) {
+					$this->makeRequest(405);
+				}
+			} else {
+				$this->makeRequest(405);
+			}
+		}
+
+
+
+
+		private function getAuth()
+		{
+			$hash_b64	= rex_request('hash', 'string');
+			$json_str 	= base64_decode($hash_b64);
+			$json_arr 	= json_decode($json_str, true);
+			if( is_array($json_arr) && count($json_arr) > 0 ) {
+				// test user
+				$sql = rex_sql::factory();
+				$sql->setDebug(false);
+				$sql->setTable(rex::getTablePrefix().'ycom_user');
+				$sql->setWhere( ['id' => $json_arr['id'], 'activation_key' => $json_arr['key'], 'status' => 1]);
+				$sql->select();
+				if($sql->getRows()) {
+					$this->getJWT($json_arr);
+				} else {
+					$this->makeRequest(401);
+				}
+			} else {
+				$this->makeRequest(400);
+			}
+		}
+
+
+
+
+		private function getJWT($json_arr)
+		{
+			$jwt = null;
+			$tokenId    = base64_encode(mcrypt_create_iv(32));
+			$issuedAt   = time();
+			$notBefore  = $issuedAt + $this->addNotBefore;  // Adding 10 seconds
+			$expire     = $notBefore + $this->addExpire; 	// Adding 60 seconds
+			$serverName = rex::getServer(); 				// Adding the server URL.
+
+			$data = [
+				'iat'  => $issuedAt,   // Issued at: time when the token was generated
+				'jti'  => $tokenId,    // Json Token Id: an unique identifier for the token
+				'iss'  => $serverName, // Issuer
+				'nbf'  => $notBefore,  // Not before
+				'exp'  => $expire,     // Expire
+				'data' => $json_arr    // Data related to the signer user
+			];
+
+			$secretKey = base64_decode($this->jwt_secretKey);
+		    $algorithm = $this->jwt_algorithm;
+		    $jwt = JWT::encode(
+		        $data,      //Data to be encoded in the JWT
+		        $secretKey, // The signing key
+		        $algorithm  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+		    );
+
+			self::makeRequest(200, $jwt);
+		}
+
 
 
 
@@ -97,6 +180,43 @@
 				echo json_encode($json);
 				exit;
 			}
+		}
+
+
+
+		/**
+		 * Get hearder Authorization
+		 * */
+		private function getAuthorizationHeader(){
+			$headers = null;
+			if (isset($_SERVER['Authorization'])) {
+				$headers = trim($_SERVER["Authorization"]);
+			}
+			else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
+				$headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
+			} elseif (function_exists('apache_request_headers')) {
+				$requestHeaders = apache_request_headers();
+				// Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+				$requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+				//print_r($requestHeaders);
+				if (isset($requestHeaders['Authorization'])) {
+					$headers = trim($requestHeaders['Authorization']);
+				}
+			}
+			return $headers;
+		}
+		/**
+		 * get access token from header
+		 * */
+		private function getBearerToken() {
+			$headers = $this->getAuthorizationHeader();
+			// HEADER: Get the access token from the header
+			if (!empty($headers)) {
+				if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+					return $matches[1];
+				}
+			}
+			return null;
 		}
 
 
