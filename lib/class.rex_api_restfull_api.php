@@ -40,14 +40,12 @@
 			if($path == 'auth/') {
 				$this->getAuth();
 			} else {
-				$this->testAuth();
-				// switch ($path) {
-				// 	case 'getimage/': $this->makeRequest(200, $arr); break;
-				// 	default: $this->makeRequest(404, $arr); break;
-				// }
+				if( $this->testAuth() ) {
+					$this->makeRequest(200, $arr);
+				} else {
+					$this->makeRequest(401);
+				}
 			}
-			exit;
-			// $this->makeRequest(200, $arr);
 		}
 
 
@@ -58,21 +56,14 @@
 			$jwt = $this->getBearerToken();
 			if ($jwt) {
 				try {
-					$secretKey = base64_decode($this->jwt_secretKey);
-					$algorithm = $this->jwt_algorithm;
 					JWT::$leeway = 60; // $leeway in seconds
-					$decoded = JWT::decode(
-						$jwt,
-						$secretKey,
-						array($algorithm)
-					);
-					$decoded_arr = (array) $decoded;
-					$this->makeRequest(200, $decoded_arr);
+					$decoded = JWT::decode( $jwt, base64_decode($this->jwt_secretKey), array($this->jwt_algorithm) );
+					return true;
 				} catch (Exception $e) {
-					$this->makeRequest(405);
+					return false;
 				}
 			} else {
-				$this->makeRequest(405);
+				return false;
 			}
 		}
 
