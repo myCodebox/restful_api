@@ -41,7 +41,9 @@
 				$this->getAuth();
 			} else {
 				if( $this->testAuth() ) {
-					$this->makeRequest(200, $arr);
+					// $this->makeRequest(200, $arr);
+					$asset = base64_encode(file_get_contents('http://lorempixel.com/200/300/cats/'));
+					$this->makeRequest(200, ['img' => $asset]);
 				} else {
 					$this->makeRequest(401);
 				}
